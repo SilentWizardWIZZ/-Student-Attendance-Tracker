@@ -1,0 +1,115 @@
+{% extends 'layout.html' %}
+
+{% block header %}Attendance Tracking{% endblock %}
+
+{% block header_buttons %}
+<div class="d-flex">
+    <input type="date" id="attendance-date" class="form-control datepicker me-2" value="{{ selected_date }}">
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Hidden form for attendance marking -->
+<form id="attendance-form" action="/attendance/mark" method="post" style="display: none;">
+    <input type="hidden" id="form-student-id" name="student_id">
+    <input type="hidden" id="form-date" name="date" value="{{ selected_date }}">
+    <input type="hidden" id="form-status" name="status">
+</form>
+
+<div class="card">
+    <div class="card-body">
+        {% if students %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th class="text-end">Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td>{{ student.grade }}</td>
+                        <td class="text-end">
+                            <div class="btn-group" role="group">
+                                <button type="button" 
+                                        class="btn btn-outline-success attendance-btn attendance-btn-present {% if student.attendance_status == 'present' %}active{% endif %}" 
+                                        data-student-id="{{ student.id }}" 
+                                        data-status="present">
+                                    <i class="fas fa-check-circle me-2"></i> Present
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-outline-danger attendance-btn attendance-btn-absent {% if student.attendance_status == 'absent' %}active{% endif %}" 
+                                        data-student-id="{{ student.id }}" 
+                                        data-status="absent">
+                                    <i class="fas fa-times-circle me-2"></i> Absent
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No students found. Please add students first.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Attendance Summary for {{ selected_date }}</h5>
+    </div>
+    <div class="card-body">
+        {% if students %}
+        <div class="row">
+            {% set present_count = students|selectattr('attendance_status', 'equalto', 'present')|list|length %}
+            {% set absent_count = students|length - present_count %}
+            {% set present_percentage = (present_count / students|length * 100)|round(1) if students|length > 0 else 0 %}
+            
+            <div class="col-md-4 mb-3">
+                <div class="card bg-success-subtle">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Present</h5>
+                        <h2 class="mb-0">{{ present_count }}</h2>
+                        <p class="card-text text-muted">{{ present_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card bg-danger-subtle">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Absent</h5>
+                        <h2 class="mb-0">{{ absent_count }}</h2>
+                        <p class="card-text text-muted">{{ (100 - present_percentage)|round(1) }}%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info-subtle">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total</h5>
+                        <h2 class="mb-0">{{ students|length }}</h2>
+                        <p class="card-text text-muted">Students</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No attendance data available for this date.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'layout.html' %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Students</h5>
+                        <h2 class="mb-0">{{ total_students }}</h2>
+                    </div>
+                    <div class="bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-user-graduate fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Present Today</h5>
+                        <h2 class="mb-0">{{ present_today }}</h2>
+                    </div>
+                    <div class="bg-success-subtle rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-user-check fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Absent Today</h5>
+                        <h2 class="mb-0">{{ absent_today }}</h2>
+                    </div>
+                    <div class="bg-danger-subtle rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-user-times fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Attendance Trend Chart -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Attendance Trend</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="attendanceTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attendance Summary Chart -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Today's Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="attendanceSummaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="/students" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-user-plus me-2"></i> Manage Students
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="/attendance" class="btn btn-outline-success w-100">
+                            <i class="fas fa-clipboard-check me-2"></i> Take Attendance
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="/reports" class="btn btn-outline-info w-100">
+                            <i class="fas fa-chart-pie me-2"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the charts with the data passed from Flask
+        initDashboardCharts(
+            {{ dates|tojson }}, 
+            {{ present_counts|tojson }}, 
+            {{ absent_counts|tojson }}
+        );
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+
+{% block header %}Attendance Reports{% endblock %}
+
+{% block header_buttons %}
+<div class="d-flex">
+    <select id="report-month" class="form-select me-2" style="width: auto;">
+        {% for month_num in months %}
+            <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                {{ ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][month_num-1] }}
+            </option>
+        {% endfor %}
+    </select>
+    <select id="report-year" class="form-select me-2" style="width: auto;">
+        {% for year in years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+    <button id="export-csv" class="btn btn-outline-secondary">
+        <i class="fas fa-download me-2"></i> Export CSV
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Monthly Attendance Report</h5>
+    </div>
+    <div class="card-body">
+        {% if students %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>Present Days</th>
+                        <th>Absent Days</th>
+                        <th>Attendance %</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td>{{ student.grade }}</td>
+                        <td>{{ student.present_count }}</td>
+                        <td>{{ student.absent_count }}</td>
+                        <td>{{ "%.1f"|format(student.attendance_percentage) }}%</td>
+                        <td>
+                            {% if student.attendance_percentage >= 90 %}
+                                <span class="badge rounded-pill bg-success">Excellent</span>
+                            {% elif student.attendance_percentage >= 80 %}
+                                <span class="badge rounded-pill bg-primary">Good</span>
+                            {% elif student.attendance_percentage >= 70 %}
+                                <span class="badge rounded-pill bg-warning text-dark">Fair</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-danger">Poor</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No students found. Please add students first.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Attendance Visualization</h5>
+    </div>
+    <div class="card-body">
+        {% if students %}
+        <div class="chart-container" style="height: 400px;">
+            <canvas id="reportsChart"></canvas>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No data available for visualization.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if students %}
+        // Prepare student data for the chart
+        const studentsData = {{ students|tojson }};
+        // Initialize reports chart
+        initReportsChart(studentsData);
+        {% endif %}
+    });
+</script>
+{% endblock %}
